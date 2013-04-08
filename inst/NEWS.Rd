@@ -1,11 +1,51 @@
 \name{NEWS}
 \title{News for Package 'XiMpLe'}
 \encoding{UTF-8}
+\section{Changes in XiMpLe version 0.03-20 (2013-03-30)}{
+  \subsection{changed}{
+    \itemize{
+      \item internally replaced paste(..., sep=\code{""}) calls with paste0(...). for R
+        versions older than 2.15 (when \code{paste0()} was introduced), a wrapper function
+        should kick in, so we don't need to change the dependencies.
+    }
+  }
+}
+\section{Changes in XiMpLe version 0.03-19 (2013-02-24)}{
+  \subsection{added}{
+    \itemize{
+      \item new methods \code{XMLScan()} and \code{XMLScan()}<- to search an XML tree recursively
+        for appearances of certain node names
+    }
+  }
+}
+\section{Changes in XiMpLe version 0.03-18 (2013-02-11)}{
+  \subsection{changed}{
+    \itemize{
+      \item renamed getter methods from getXML*() into the more generic XML*()
+    }
+  }
+  \subsection{added}{
+    \itemize{
+      \item added setter methods XML*()<- to all getter methods
+      \item added tests for getter/setter methods
+    }
+  }
+}
+\section{Changes in XiMpLe version 0.03-17 (2013-02-04)}{
+  \subsection{added}{
+    \itemize{
+      \item added proper \code{is.XiMpLe.node()} and \code{is.XiMpLe.doc()} functions
+      \item added getter functions for all slots in XiMpLe.node and XiMpLe.doc
+        objects (e.g., \code{getXMLName()} to get the name slot of a XiMpLe.node object)
+    }
+  }
+}
 \section{Changes in XiMpLe version 0.03-16 (2012-11-05)}{
   \subsection{added}{
     \itemize{
       \item added examples to all functions
       \item added a vignette
+      \item additional tests for \code{node()}<-
     }
   }
   \subsection{fixed}{
@@ -16,6 +56,15 @@
         instead of "<br />"
       \item parsing error for DOCTYPE nodes mixed up elements and previously ignored
         the \code{"decl"} value
+      \item \code{node()}<- now replaces both text values and pseudo tags with a new value.
+        this can still be problematic for child nodes which contain a mix of
+        pseudo and actual tags, so a warning will be given until this is resolved
+    }
+  }
+  \subsection{changed}{
+    \itemize{
+      \item \code{node()} now reports text values of nodes which have \code{"value"} and a pseudo
+        tag at the same time as one character string, like pasteXML does
     }
   }
 }

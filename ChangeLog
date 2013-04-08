@@ -1,9 +1,34 @@
 ChangeLog for package XiMpLe
 
+changes in version 0.03-20 (2013-03-30)
+changed:
+  - internally replaced paste(..., sep="") calls with paste0(...). for R
+    versions older than 2.15 (when paste0() was introduced), a wrapper function
+    should kick in, so we don't need to change the dependencies.
+
+changes in version 0.03-19 (2013-02-24)
+added:
+  - new methods XMLScan() and XMLScan()<- to search an XML tree recursively
+    for appearances of certain node names
+
+changes in version 0.03-18 (2013-02-11)
+changed:
+  - renamed getter methods from getXML*() into the more generic XML*()
+added:
+  - added setter methods XML*()<- to all getter methods
+  - added tests for getter/setter methods
+
+changes in version 0.03-17 (2013-02-04)
+added:
+  - added proper is.XiMpLe.node() and is.XiMpLe.doc() functions
+  - added getter functions for all slots in XiMpLe.node and XiMpLe.doc
+    objects (e.g., getXMLName() to get the name slot of a XiMpLe.node object)
+
 changes in version 0.03-16 (2012-11-05)
 added:
   - added examples to all functions
   - added a vignette
+  - additional tests for node()<-
 fixed:
   - fixed dropping of last tag/text value if XML was incomplete, e.g., just
     an excerpt of a full tree
@@ -11,6 +36,12 @@ fixed:
     instead of "<br />"
   - parsing error for DOCTYPE nodes mixed up elements and previously ignored
     the "decl" value
+  - node()<- now replaces both text values and pseudo tags with a new value.
+    this can still be problematic for child nodes which contain a mix of
+    pseudo and actual tags, so a warning will be given until this is resolved
+changed:
+  - node() now reports text values of nodes which have "value" and a pseudo
+    tag at the same time as one character string, like pasteXML does
 
 changes in version 0.03-15 (2012-10-26)
 fixed:
