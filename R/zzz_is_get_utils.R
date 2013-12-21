@@ -1,3 +1,21 @@
+# Copyright 2011-2013 Meik Michalke <meik.michalke@hhu.de>
+#
+# This file is part of the R package XiMpLe.
+#
+# XiMpLe is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# XiMpLe is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with XiMpLe.  If not, see <http://www.gnu.org/licenses/>.
+
+
 ## the name "zzz_*" is just to ensure roxygen doesn't parse it before XMLNode.R and XMLTree.R
 
 #' @param x An arbitrary \code{R} object.
@@ -36,10 +54,17 @@ is.XiMpLe.doc <- function(x){
 #' Another special method can scan a node/document tree object for appearances of nodes with a particular name:
 #'
 #' \itemize{
-#'		\item{\code{XMLScan()}: }{get/set the XML nodes by name (recursively searches slot \code{name} of both classes
-#'			\code{XiMpLe.node} and  \code{XiMpLe.doc})}
+#'		\item{\code{XMLScan(obj, name, as.list=FALSE)}: }{get/set the XML nodes by name (recursively searches slot \code{name} of both classes
+#'			\code{XiMpLe.node} and  \code{XiMpLe.doc}). If \code{as.list=TRUE} allways returns a list (or NULL), otherwise if exactly one result is found,
+#'			it will be returned as as single \code{XiMpLe.node}.}
 #' }
 #'
+#' Finally, there is a method to scan for certain values in XiMpLe objects and just list them. For instance, it can be used to
+#' list all instances of a certain attribute type in a document tree:
+#'
+#' \itemize{
+#'		\item{\code{XMLScanDeep(obj, find, search="attributes")}: }{returns all found instances of \code{find} in all slots defined by \code{search}.}
+#' }
 #' @param obj An object of class \code{XiMpLe.node} or \code{XiMpLe.doc}
 #' @seealso
 #'		\code{\link[XiMpLe:node]{node}},
@@ -317,7 +342,7 @@ setMethod("XMLDTD<-",
 ## scan a tree for appearances of nodes
 #' @rdname XMLGetters-methods
 #' @exportMethod XMLScan
-setGeneric("XMLScan", function(obj, name) standardGeneric("XMLScan"))
+setGeneric("XMLScan", function(obj, name, as.list=FALSE) standardGeneric("XMLScan"))
 
 # internal helper function
 find.nodes <- function(nodes, nName){
@@ -340,13 +365,13 @@ find.nodes <- function(nodes, nName){
 #' @include XiMpLe.node-class.R
 setMethod("XMLScan",
 	signature=signature(obj="XiMpLe.node"),
-	function(obj, name){
+	function(obj, name, as.list=FALSE){
 		node.list <- find.nodes(
 			nodes=child.list(obj),
 			nName=name)
 		if(identical(node.list, list())){
 			return(NULL)
-		} else if(length(node.list) == 1){
+		} else if(length(node.list) == 1 && !isTRUE(as.list)){
 			return(node.list[[1]])
 		} else {
 			return(node.list)
@@ -361,13 +386,13 @@ setMethod("XMLScan",
 #' @include XiMpLe.doc-class.R
 setMethod("XMLScan",
 	signature=signature(obj="XiMpLe.doc"),
-	function(obj, name){
+	function(obj, name, as.list=FALSE){
 		node.list <- find.nodes(
 			nodes=XMLChildren(obj),
 			nName=name)
 		if(identical(node.list, list())){
 			return(NULL)
-		} else if(length(node.list) == 1){
+		} else if(length(node.list) == 1 && !isTRUE(as.list)){
 			return(node.list[[1]])
 		} else {
 			return(node.list)
@@ -440,5 +465,62 @@ setMethod("XMLScan<-",
 				replacement=value)[[1]]
 		stopifnot(validObject(object=obj, test=TRUE, complete=TRUE))
 		return(obj)
+	}
+)
+
+#' @rdname XMLGetters-methods
+#' @exportMethod XMLScanDeep
+setGeneric("XMLScanDeep", function(obj, find=NULL, search="attributes") standardGeneric("XMLScanDeep"))
+
+# internal helper function
+recursiveScan <- function(robj, rfind, rsearch, recResult=list(), result, envID="all"){
+	if(is.XiMpLe.doc(robj)){
+		recResult <- append(recResult, lapply(robj@children, function(this.child){
+			recursiveScan(robj=this.child, rfind=rfind, rsearch=rsearch, recResult=recResult, result=result, envID=envID)
+		}))
+	} else if(is.XiMpLe.node(robj)){
+		attrs <- XMLAttrs(robj)[[rfind]]
+		if(!is.null(attrs)){
+			attrResult <- as.list(result)
+			nodeName <- XMLName(robj)
+			attrResult[[envID]] <- append(attrResult[[envID]], attrs)
+			names(attrResult[[envID]])[length(attrResult[[envID]])] <- nodeName
+			list2env(attrResult, envir=result)
+		} else {}
+		recResult <- append(recResult, lapply(robj@children, function(this.child){
+			recursiveScan(robj=this.child, rfind=rfind, rsearch=rsearch, recResult=recResult, result=result, envID=envID)
+		}))
+	}
+	return(recResult)
+}
+
+#' @rdname XMLGetters-methods
+#' @aliases
+#'		XMLScanDeep,-methods
+#'		XMLScanDeep,XiMpLe.node-method
+#' @docType methods
+#' @include XiMpLe.node-class.R
+setMethod("XMLScanDeep",
+	signature=signature(obj="XiMpLe.node"),
+	function(obj, find, search){
+		result <- new.env()
+		assign(find, c(), envir=result)
+		recursiveScan(robj=obj, rfind=find, rsearch=search, recResult=list(), result=result, envID=find)
+		return(get(find, envir=result))
+	}
+)
+
+#' @rdname XMLGetters-methods
+#' @aliases
+#'		XMLScanDeep,XiMpLe.doc-method
+#' @docType methods
+#' @include XiMpLe.doc-class.R
+setMethod("XMLScanDeep",
+	signature=signature(obj="XiMpLe.doc"),
+	function(obj, find, search){
+		result <- new.env()
+		assign(find, c(), envir=result)
+		recursiveScan(robj=obj, rfind=find, rsearch=search, recResult=list(), result=result, envID=find)
+		return(get(find, envir=result))
 	}
 )

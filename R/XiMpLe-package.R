@@ -3,8 +3,8 @@
 #' \tabular{ll}{
 #' Package: \tab XiMpLe\cr
 #' Type: \tab Package\cr
-#' Version: \tab 0.03-20\cr
-#' Date: \tab 2013-04-08\cr
+#' Version: \tab 0.03-21\cr
+#' Date: \tab 2013-12-21\cr
 #' Depends: \tab R (>= 2.9.0),methods\cr
 #' Enhances: \tab rkward\cr
 #' Encoding: \tab UTF-8\cr
@@ -18,10 +18,10 @@
 #' It's not as powerful as the XML package and doesn't aim to be, but for simple XML handling
 #' it could be useful. It was originally programmed for RKWard.
 #'
-#' @aliases XiMpLe-package XiMpLe
+#' @aliases XiMpLe-package
 #' @name XiMpLe-package
 #' @docType package
 #' @title The XiMpLe Package
-#' @author Meik Michalke \email{meik.michalke@@hhu.de}
+#' @author Meik Michalke
 #' @keywords package
 NULL
