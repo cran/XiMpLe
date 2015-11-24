@@ -1,12 +1,52 @@
 \name{NEWS}
 \title{News for Package 'XiMpLe'}
 \encoding{UTF-8}
-\section{Changes in XiMpLe version 0.03-21 (2013-05-24)}{
+\section{Changes in XiMpLe version 0.03-23 (2015-11-24)}{
+  \subsection{changed}{
+    \itemize{
+      \item relocated the unit tests to tests/testthat
+    }
+  }
+  \subsection{fixed}{
+    \itemize{
+      \item \code{XMLScanDeep()} was said to examine node names, children and values as well
+        as attributes, but in fact it was hard-wired on attributes only. removed
+        children from the list and added support for names and values
+      \item corrected internal function \code{setMinIndent()} and \code{pasteXMLTag()} for better
+        indentation for comments
+      \item internal function \code{indent()} can now handle negative levels
+    }
+  }
+}
+\section{Changes in XiMpLe version 0.03-22 (2014-12-02)}{
+  \subsection{fixed}{
+    \itemize{
+      \item added curly brackets to the function bodies of all \code{setGeneric()} calls to
+        satisfy roxygen2
+    }
+  }
+  \subsection{changed}{
+    \itemize{
+      \item allowing empty attributes (attr=\code{""}), these were skipped, but only if
+        there was more than one attribute
+    }
+  }
+}
+\section{Changes in XiMpLe version 0.03-21 (2013-12-21)}{
   \subsection{added}{
     \itemize{
       \item new attribute \code{"as.list"} added to \code{XMLScan()}, if TRUE forces the return
         value to be a list of length 1 (default is still to directly return the
         single node).
+      \item new method \code{XMLScanDeep()} recursively scans for attributes and returns all
+        which were found
+    }
+  }
+  \subsection{changed}{
+    \itemize{
+      \item added a proper GPL notice at the beginning of each R file
+      \item the vignette was moved from inst/doc to inst/vignettes
+      \item synced names of Author: and Maintainer: in DESCRIPTION with Autors@R:
     }
   }
 }

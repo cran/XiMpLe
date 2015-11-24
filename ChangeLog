@@ -1,5 +1,24 @@
 ChangeLog for package XiMpLe
 
+changes in version 0.03-23 (2015-11-24)
+changed:
+  - relocated the unit tests to tests/testthat
+fixed:
+  - XMLScanDeep() was said to examine node names, children and values as well
+    as attributes, but in fact it was hard-wired on attributes only. removed
+    children from the list and added support for names and values
+  - corrected internal function setMinIndent() and pasteXMLTag() for better
+    indentation for comments
+  - internal function indent() can now handle negative levels
+
+changes in version 0.03-22 (2014-12-02)
+fixed:
+  - added curly brackets to the function bodies of all setGeneric() calls to
+    satisfy roxygen2
+changed:
+  - allowing empty attributes (attr=""), these were skipped, but only if
+    there was more than one attribute
+
 changes in version 0.03-21 (2013-12-21)
 added:
   - new attribute "as.list" added to XMLScan(), if TRUE forces the return
