@@ -15,17 +15,41 @@
 \alias{node<-,XiMpLe.node-method}
 \title{Extract/manipulate a node or parts of it from an XML tree}
 \usage{
-node(obj, node = list(), what = NULL, cond.attr = NULL,
-  cond.value = NULL, element = NULL)
+node(
+  obj,
+  node = list(),
+  what = NULL,
+  cond.attr = NULL,
+  cond.value = NULL,
+  element = NULL
+)
 
-\S4method{node}{XiMpLe.XML}(obj, node = list(), what = NULL,
-  cond.attr = NULL, cond.value = NULL, element = NULL)
+\S4method{node}{XiMpLe.XML}(
+  obj,
+  node = list(),
+  what = NULL,
+  cond.attr = NULL,
+  cond.value = NULL,
+  element = NULL
+)
 
-node(obj, node = list(), what = NULL, cond.attr = NULL,
-  cond.value = NULL, element = NULL) <- value
+node(
+  obj,
+  node = list(),
+  what = NULL,
+  cond.attr = NULL,
+  cond.value = NULL,
+  element = NULL
+) <- value
 
-\S4method{node}{XiMpLe.XML}(obj, node = list(), what = NULL,
-  cond.attr = NULL, cond.value = NULL, element = NULL) <- value
+\S4method{node}{XiMpLe.XML}(
+  obj,
+  node = list(),
+  what = NULL,
+  cond.attr = NULL,
+  cond.value = NULL,
+  element = NULL
+) <- value
 }
 \arguments{
 \item{obj}{An object of class \code{\link[XiMpLe:XiMpLe.doc-class]{XiMpLe.doc}} or
@@ -35,8 +59,7 @@ node(obj, node = list(), what = NULL, cond.attr = NULL,
 the child of its previous element. duplicate matches will be returned as a list.}
 
 \item{what}{A character string,
-      must be a valid slot name of class \code{\link[XiMpLe:XiMpLe.node-class]{XiMpLe.node}},
-      like
+      must be a valid slot name of class \code{\link[XiMpLe:XiMpLe.node-class]{XiMpLe.node}}, like
 \code{"attributes"} or \code{"value"}. If not \code{NULL},
       only that part of a node will be returned.
 There's also two special properties for this option: \code{what="@path"} will not return the

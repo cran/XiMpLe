@@ -18,12 +18,10 @@
 \alias{XMLChildren,XiMpLe.node-method}
 \alias{XMLChildren,-methods}
 \alias{XMLChildren,XiMpLe.doc-method}
-\alias{XMLChildren,-methods}
 \alias{XMLChildren<-}
 \alias{XMLChildren<-,XiMpLe.node-method}
 \alias{XMLChildren<-,-methods}
 \alias{XMLChildren<-,XiMpLe.doc-method}
-\alias{XMLChildren<-,-methods}
 \alias{XMLValue}
 \alias{XMLValue,XiMpLe.node-method}
 \alias{XMLValue,-methods}
@@ -185,8 +183,7 @@ Another special method can scan a node/document tree object for appearances of n
 }
 
 Finally,
-      there is a method to scan for certain values in XiMpLe objects and just list them. For instance,
-      it can be used to
+      there is a method to scan for certain values in XiMpLe objects and just list them. For instance, it can be used to
 list all instances of a certain attribute type in a document tree:
 
 \itemize{
