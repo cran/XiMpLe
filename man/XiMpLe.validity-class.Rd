@@ -4,6 +4,7 @@
 \docType{class}
 \name{XiMpLe.validity,-class}
 \alias{XiMpLe.validity,-class}
+\alias{XMLValidity}
 \alias{XiMpLe.validity-class}
 \alias{is.XiMpLe.validity}
 \title{Class XiMpLe.validity}
@@ -14,10 +15,11 @@ is.XiMpLe.validity(x)
 \item{x}{An arbitrary \code{R} object.}
 }
 \description{
-Used for objects that describe valid child nodes and attributes of XiMpLe.nodes.
+Used for objects that describe valid child nodes and attributes of \code{XiMpLe_node}s.
 }
 \details{
-You should use \code{\link[XiMpLe:XMLValidity]{XMLValidity}} to create objects of this class.
+A contructor function \code{XMLValidity(...)} is available to be used instead of \code{new("XiMpLe.validity",
+      ...)}.
 }
 \section{Slots}{
 
@@ -82,7 +84,6 @@ XMLRecursion <- XMLValidity(
  )
 }
 \seealso{
-\code{\link[XiMpLe:XMLValidity]{XMLValidity}},
-   \code{\link[XiMpLe:validXML]{validXML}}
+\code{\link[XiMpLe:validXML]{validXML}}
 }
 \keyword{classes}

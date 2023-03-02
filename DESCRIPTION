@@ -8,7 +8,7 @@ Description: Provides a simple XML tree parser/generator. It includes
         XML handling it could be useful. It was originally developed for
         the R GUI and IDE 'RKWard' <https://rkward.kde.org>, to make plugin
         development easier.
-Depends: R (>= 2.9.0)
+Depends: R (>= 3.5.0)
 Imports: methods
 Suggests: testthat,knitr,rmarkdown
 VignetteBuilder: knitr
@@ -19,18 +19,20 @@ Encoding: UTF-8
 LazyLoad: yes
 Authors@R: c(person(given="Meik", family="Michalke",
         email="meik.michalke@hhu.de", role=c("aut", "cre")))
-Version: 0.10-3
-Date: 2020-09-19
-RoxygenNote: 7.1.1
+Version: 0.11-1
+Date: 2023-03-02
+RoxygenNote: 7.2.2
 Collate: '00_class_01_XiMpLe.node.R' '00_class_02_XiMpLe.doc.R'
         '00_class_03_XiMpLe.validity.R' '01_method_01_pasteXML.R'
         'XiMpLe-internal.R' '01_method_02_node.R' '01_method_03_show.R'
         '01_method_04_validXML.R' '01_method_05_XMLgenerators.R'
-        'XMLNode.R' 'XMLTree.R' 'XMLValidity.R' 'XiMpLe-package.R'
-        'parseXMLTree.R' 'pasteXMLTag.R' 'zzz_is_get_utils.R'
+        'XMLNode.R' 'XMLTree.R' 'XiMpLe-package.R'
+        'gen_tag_functions.R' 'parseXMLTree.R' 'pasteXMLTag.R'
+        'provide_file.R' 'zzz_is_get_utils.R'
+        'zzz_is_get_utils_deprecated.R'
 NeedsCompilation: no
-Packaged: 2020-09-19 16:57:21 UTC; m
+Packaged: 2023-03-02 12:46:24 UTC; m
 Author: Meik Michalke [aut, cre]
 Maintainer: Meik Michalke <meik.michalke@hhu.de>
 Repository: CRAN
-Date/Publication: 2020-09-19 17:20:02 UTC
+Date/Publication: 2023-03-02 13:10:06 UTC

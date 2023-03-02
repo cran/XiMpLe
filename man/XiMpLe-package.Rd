@@ -13,8 +13,8 @@ The DESCRIPTION file:
 \tabular{ll}{
 Package: \tab XiMpLe\cr
 Type: \tab Package\cr
-Version: \tab 0.10-3\cr
-Date: \tab 2020-09-19\cr
+Version: \tab 0.11-1\cr
+Date: \tab 2023-03-02\cr
 Depends: \tab R (>= 2.9.0)\cr
 Encoding: \tab UTF-8\cr
 License: \tab GPL (>= 3)\cr

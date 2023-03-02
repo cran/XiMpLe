@@ -21,14 +21,14 @@
 #' Can be used to create full XML trees.
 #'
 #' @param ... Optional children for the XML tree. Must be either objects of class
-#'    \code{\link[XiMpLe:XiMpLe.node-class]{XiMpLe.node}} or character strings,
+#'    \code{\link[XiMpLe:XiMpLe_node-class]{XiMpLe_node}} or character strings,
 #'    which are treated as simple text values.
 #' @param xml A named list, XML declaration of the XML tree. Currently just pasted, no checking is done.
 #' @param dtd A named list, doctype definition of the XML tree. Valid elements are \code{doctype} (root element), \code{decl}
 #' ("PUBLIC" or "SYSTEM"), \code{id} (the identifier) and \code{refer} (URI to .dtd).
 #'    Currently just pasted, no checking is done.
 #' @param .children Alternative way of specifying children, if you have them already as a list.
-#' @return An object of class \code{\link[XiMpLe:XiMpLe.doc-class]{XiMpLe.doc}}
+#' @return An object of class \code{\link[XiMpLe:XiMpLe_doc-class]{XiMpLe_doc}}
 #' @seealso
 #'    \code{\link[XiMpLe:XMLNode]{XMLNode}},
 #'    \code{\link[XiMpLe:pasteXML]{pasteXML}}
@@ -55,7 +55,7 @@ XMLTree <- function(..., xml=NULL, dtd=NULL, .children=list(...)){
   # check for text values
   all.children <- sapply(child.list(.children), function(this.child){
     if(is.character(this.child)){
-      this.child <- new("XiMpLe.node",
+      this.child <- XiMpLe_node(
           name="",
           value=this.child
         )
@@ -70,7 +70,7 @@ XMLTree <- function(..., xml=NULL, dtd=NULL, .children=list(...)){
     dtd <- list()
   } else {}
   
-  newTree <- new("XiMpLe.doc",
+  newTree <- XiMpLe_doc(
     xml=xml,
     dtd=dtd,
     children=all.children

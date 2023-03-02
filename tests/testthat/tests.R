@@ -1,3 +1,6 @@
+# library(XiMpLe)
+# library(testthat)
+
 context("XML generation")
 
 test_that("generate empty XML node", {
@@ -19,9 +22,38 @@ test_that("generate closed XML node", {
 test_that("generate closed XML node with attributes", {
   # re-create object sampleXMLnode.attrs
   load("sample_XML_node_attrs.RData")
+  # three ways to the same result
   expect_that(
     XMLNode("empty", "test", attrs=list(foo="bar")),
     equals(sampleXMLnode.attrs)
+  )
+  expect_that(
+    XMLNode("empty", "test", foo="bar"),
+    equals(sampleXMLnode.attrs)
+  )
+  expect_that(
+    XMLNode("empty", .children=list("test", foo="bar")),
+    equals(sampleXMLnode.attrs)
+  )
+})
+
+test_that("generate generator functions", {
+  # for this test, we'll put generated functions to their own environment
+  my_functions <- new.env()
+  gen_tag_functions(c("x","y","abc"), envir=my_functions)
+  my_func_list <- as.list(my_functions)
+
+  expect_that(
+    sort(c("x_","y_","abc_")),
+    equals(sort(names(my_func_list)))
+  )
+  expect_true(all(sapply(my_func_list, is.function)))
+
+  XML_node_x <- my_func_list[["x_"]]("foo")
+
+  expect_that(
+    XML_node_x,
+    equals(XMLNode("x", "foo"))
   )
 })
 
@@ -50,29 +82,29 @@ test_that("generate nested XML tag tree", {
 context("XML parsing")
 
 test_that("parse XML file", {
-  # re-create object sampleXMLparsed
+  # re-create object sampleRSSparsed
   load("sample_RSS_parsed.RData")
 
-  sampleXMLFile <- normalizePath("koRpus_RSS_sample.xml")
-  XMLtoParse <- file(sampleXMLFile, encoding="UTF-8")
-  sampleXMLparsed.test <- parseXMLTree(XMLtoParse)
+  sampleRSSFile <- normalizePath("koRpus_RSS_sample.xml")
+  XMLtoParse <- file(sampleRSSFile, encoding="UTF-8")
+  sampleRSSparsed.test <- parseXMLTree(XMLtoParse)
   close(XMLtoParse)
 
   expect_that(
-    sampleXMLparsed.test,
-    equals(sampleXMLparsed))
+    sampleRSSparsed.test,
+    equals(sampleRSSparsed))
 })
 
 
 context("extracting nodes")
 
 test_that("extract node from parsed XML tree", {
-  # re-create object sampleXMLparsed
+  # re-create object sampleRSSparsed
   load("sample_RSS_parsed.RData")
   # re-create object sampleXMLnode.extracted
   load("sample_XML_node_extracted.RData")
 
-  sampleXMLnode.test <- node(sampleXMLparsed, node=list("rss","channel","atom:link"))
+  sampleXMLnode.test <- node(sampleRSSparsed, node=list("rss","channel","atom:link"))
 
   expect_that(
     sampleXMLnode.test,
@@ -83,41 +115,41 @@ test_that("extract node from parsed XML tree", {
 context("changing node values")
 
 test_that("change attribute values in XML node", {
-  # re-create object sampleXMLparsed
+  # re-create object sampleRSSparsed
   load("sample_RSS_parsed.RData")
-  # re-create object sampleXMLnode.extracted
-  load("sample_XML_tree_changed.RData")
+  # re-create object sampleRSSparsed.changed
+  load("sample_RSS_changed.RData")
 
   # replace URL
-  node(sampleXMLparsed,
+  node(sampleRSSparsed,
     node=list("rss","channel","atom:link"),
     what="attributes", element="href") <- "http://example.com"
 
   # remove "rel" attribute
-  node(sampleXMLparsed,
+  node(sampleRSSparsed,
     node=list("rss","channel","atom:link"),
     what="attributes", element="rel") <- NULL
 
   expect_that(
-    sampleXMLparsed,
-    equals(sampleXMLparsed.changed))
+    sampleRSSparsed,
+    equals(sampleRSSparsed.changed))
 })
 
 test_that("change nested text value in XML node", {
-  # re-create object sampleXMLparsed
+  # re-create object sampleRSSparsed
   load("sample_RSS_parsed.RData")
   # re-create object sampleXMLnode.extracted
-  load("sample_XML_tree_changed_value.RData")
+  load("sample_RSS_changed_value.RData")
 
   # change text
-  node(sampleXMLparsed,
+  node(sampleRSSparsed,
     node=list("rss","channel","item","title"),
     what="value",
     cond.value="Changes in koRpus version 0.04-30") <- "this value was changed!"
 
   expect_that(
-    sampleXMLparsed,
-    equals(sampleXMLparsed.changed.value))
+    sampleRSSparsed,
+    equals(sampleRSSparsed.changed.value))
 })
 
 context("getter/setter methods")
@@ -472,5 +504,20 @@ test_that("validate XML objects: attributes", {
       children=FALSE
     ),
     regexp="Invalid XML attributes for <p> node: style"
+  )
+})
+
+
+context("Class updates")
+
+test_that("update XML tag tree from XiMpLe.doc to XiMpLe_doc", {
+  load("sample_XML_tree_old.RData")
+  load("sample_XML_tree.RData")
+
+  sampleXMLTree_old <- as_XiMpLe_doc(sampleXMLTree_old)
+
+  expect_that(
+    sampleXMLTree_old,
+    equals(sampleXMLTree)
   )
 })

@@ -1,4 +1,4 @@
-# Copyright 2011-2017 Meik Michalke <meik.michalke@hhu.de>
+# Copyright 2011-2022 Meik Michalke <meik.michalke@hhu.de>
 #
 # This file is part of the R package XiMpLe.
 #
@@ -32,25 +32,47 @@
 #' @docType methods
 #' @rdname node
 #' @export
-setGeneric("node", function(obj, node=list(), what=NULL, cond.attr=NULL, cond.value=NULL, element=NULL){standardGeneric("node")})
+setGeneric(
+  "node",
+  function(
+    obj,
+    node=list(),
+    what=NULL,
+    cond.attr=NULL,
+    cond.value=NULL,
+    element=NULL
+  ){
+    standardGeneric("node")
+  }
+)
 
 # define class union to make life easier
-#' @description \code{XiMpLe.XML} is a class union for objects of classes \code{XiMpLe.node} and \code{XiMpLe.doc}.
+#' @description \code{XiMpLe.XML} is a class union for objects of classes \code{XiMpLe_node} and \code{XiMpLe_doc}.
 #' @rdname node
 #' @export
-setClassUnion("XiMpLe.XML", members=c("XiMpLe.node", "XiMpLe.doc"))
+setClassUnion(
+  "XiMpLe.XML",
+  members=c(
+    "XiMpLe_node",
+    "XiMpLe_doc",
+    "XiMpLe.node",
+    "XiMpLe.doc"
+  )
+)
 
 #' @rdname node
 #' @aliases
 #'    node,-methods
+#'    node,XiMpLe_doc-method
+#'    node,XiMpLe_node-method
 #'    node,XiMpLe.doc-method
 #'    node,XiMpLe.node-method
 #'    node,XiMpLe.XML-method
-#' @param obj An object of class \code{\link[XiMpLe:XiMpLe.doc-class]{XiMpLe.doc}} or
-#'    \code{\link[XiMpLe:XiMpLe.node-class]{XiMpLe.node}}.
+#' @param obj An object of class \code{\link[XiMpLe:XiMpLe_doc-class]{XiMpLe_doc}} or
+#'    \code{\link[XiMpLe:XiMpLe_node-class]{XiMpLe_node}}.
 #' @param node A list of node names (or their numeric values), where each element is
 #'    the child of its previous element. duplicate matches will be returned as a list.
-#' @param what A character string, must be a valid slot name of class \code{\link[XiMpLe:XiMpLe.node-class]{XiMpLe.node}}, like
+#' @param what A character string, must be a valid slot name of class \code{\link[XiMpLe:XiMpLe_node-class]{XiMpLe_node}}, like
 #'    \code{"attributes"} or \code{"value"}. If not \code{NULL}, only that part of a node will be returned.
 #'    There's also two special properties for this option: \code{what="@@path"} will not return the
 #'    node or it's contents, but a character string with the "path" to it in the object; \code{what="obj@@path"}
@@ -63,7 +85,14 @@ setClassUnion("XiMpLe.XML", members=c("XiMpLe.node", "XiMpLe.doc"))
 #'    elements will be returned.
 setMethod("node",
   signature(obj="XiMpLe.XML"),
-  function(obj, node=list(), what=NULL, cond.attr=NULL, cond.value=NULL, element=NULL){
+  function(
+    obj,
+    node=list(),
+    what=NULL,
+    cond.attr=NULL,
+    cond.value=NULL,
+    element=NULL
+  ){
 
     # check top level if this is a node, not a tree
     if(is.XiMpLe.node(obj)){
@@ -140,8 +169,8 @@ setMethod("node",
 
     if(!is.null(what)){
       stopifnot(length(what) == 1)
-      if(!what %in% c(slotNames(new("XiMpLe.node")), "@path", "obj@path")){
-        stop(simpleError(paste0("Invalid slot for class XiMpLe.node:", paste(sQuote(what), collapse=", "), "!")))
+      if(!what %in% c(slotNames(XiMpLe_node()), "@path", "obj@path")){
+        stop(simpleError(paste0("Invalid slot for class XiMpLe_node:", paste(sQuote(what), collapse=", "), "!")))
       } else {}
       if(identical(what, "@path")){
         ## return subtituted path info
@@ -191,17 +220,41 @@ setMethod("node",
 #' @param value The value to set.
 #' @export
 #' @rdname node
-setGeneric("node<-", function(obj, node=list(), what=NULL, cond.attr=NULL, cond.value=NULL, element=NULL, value){standardGeneric("node<-")})
+setGeneric(
+  "node<-",
+  function(
+    obj,
+    node=list(),
+    what=NULL,
+    cond.attr=NULL,
+    cond.value=NULL,
+    element=NULL,
+    value
+  ){
+    standardGeneric("node<-")
+  }
+)
 
 #' @rdname node
 #' @aliases
 #'    node<-,-methods
+#'    node<-,XiMpLe_doc-method
+#'    node<-,XiMpLe_node-method
 #'    node<-,XiMpLe.doc-method
 #'    node<-,XiMpLe.node-method
 #'    node<-,XiMpLe.XML-method
-setMethod("node<-",
+setMethod(
+  "node<-",
   signature(obj="XiMpLe.XML"),
-  function(obj, node=list(), what=NULL, cond.attr=NULL, cond.value=NULL, element=NULL, value){
+  function(
+    obj,
+    node=list(),
+    what=NULL,
+    cond.attr=NULL,
+    cond.value=NULL,
+    element=NULL,
+    value
+  ){
 
   # get path to node in object
   obj.paths <- node(obj, node=node, what="obj@path", cond.attr=cond.attr, cond.value=cond.value)
@@ -241,7 +294,7 @@ setMethod("node<-",
 
         # paste new value into a single pseudo node
         pseudo.node <- paste0(this.node, "@children <- append(", this.node, "@children, ",
-          "new(\"XiMpLe.node\", name=\"\", value=\"", value, "\"), after=0)")
+          "XiMpLe_node(name=\"\", value=\"", value, "\"), after=0)")
         eval(parse(text=pseudo.node))
 
         # now return the object

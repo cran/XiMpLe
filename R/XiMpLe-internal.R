@@ -1,4 +1,4 @@
-# Copyright 2011-2020 Meik Michalke <meik.michalke@hhu.de>
+# Copyright 2011-2022 Meik Michalke <meik.michalke@hhu.de>
 #
 # This file is part of the R package XiMpLe.
 #
@@ -172,6 +172,211 @@ indent <- function(level, by="\t"){
 } ## end function indent()
 
 
+# TODO:
+## function paste_shine()
+# pastes nodes with a given indentation and separator between arguments
+#
+# output is this for shine=0:
+# {start}{ attrs[1] attrs[2]}{ child}{end}
+#
+# output is this for shine=1:
+# {start}{
+#   attrs[1] attrs[2]}{
+#   child}
+# {end}
+#
+# output is this for shine=2:
+# {start}{
+#   attrs[1]
+#   attrs[2]}{
+#   child}
+# {end}
+#
+# start: the initial tag start, e.g. "<a" or "<br"
+# end: how the inital tag ends, e.g. ">" or "/>"
+# attrs: optional character vector, arguments to paste
+# child: optional character string, a fully indeted child node, used for recursion
+# close: closong tag for non-empty tags, e.g. "</a>"
+# level: level of indentation for the tag; indentation of arguments or child nodes depends on 'shine'
+# indent.by: indentation character
+# shine: shine level
+# space_child: useful for e.g. comment tags to add a single space between start/closing tags and value
+# space_attrs: similar to space_child, but adds an extra space only before the end tag
+# as_script: logical, whether to separate by space (FALSE) or comma (TRUE)
+paste_shine <- function(
+  start,
+  end,
+  attrs,
+  child,
+  close,
+  level,
+  indent.by="\t",
+  shine=1,
+  space_child=FALSE,
+  space_attrs=FALSE,
+  as_script=FALSE
+){
+  if(isTRUE(as_script)){
+    next_sep <- ","
+  } else {
+    next_sep <- ""
+  }
+  indent_node <- indent(level=level, by=indent.by)
+  indent_attrs <- indent(level=level + 1, by=indent.by)
+  indent_child <- indent(level=level + 1, by=indent.by)
+  indent_end <- indent(level=level, by=indent.by)
+  indent_close <- indent(level=level, by=indent.by)
+  next_node <- "\n"
+  extra_space_child <-""
+  extra_space_attrs <-""
+  if(isTRUE(as_script)){
+    next_attr <- next_sep
+  } else {
+    next_attr <- paste0(next_sep, "\n")
+  }
+  next_close <- "\n"
+  first_attr <- "\n"
+  first_child <- "\n"
+
+  if(shine < 1){
+    # shine is 0
+    indent_attrs <- ""
+    indent_child <- ""
+    indent_end <- ""
+    indent_close <- ""
+    next_node <- ""
+    next_close <- ""
+    if(isTRUE(as_script)){
+      next_attr <- paste0(next_sep, " ")
+      first_attr <- ""
+    } else {
+      next_attr <- next_sep
+      first_attr <- " "
+      if(isTRUE(space_child)){
+        extra_space_child <-" "
+      } else {}
+      if(isTRUE(space_attrs)){
+        extra_space_attrs <-" "
+      } else {}
+    }
+    first_child <- ""
+  } else if(shine < 2){
+    # shine is 1
+    if(isTRUE(as_script)){
+      indent_attrs <- ""
+    } else {
+      indent_attrs <- " "
+      if(isTRUE(space_attrs)){
+        extra_space_attrs <-" "
+      } else {}
+    }
+    indent_end <- ""
+    next_attr <- next_sep
+    first_attr <- ""
+  } else {
+    # shine is 2, keep defaults
+  }
+
+  no_attrs <- no_child <- no_close <- FALSE
+  if(missing(attrs)){
+    attrs <- ""
+    no_attrs <- TRUE
+  } else if(any(identical(trim(attrs), ""), identical(trim(attrs), character()))){
+    no_attrs <- TRUE
+  }
+  if(missing(child)){
+    child <- ""
+    no_child <- TRUE
+  } else if(any(identical(trim(child), ""), identical(trim(child), character()))){
+    no_child <- TRUE
+  }
+  if(missing(close)){
+    close <- ""
+    no_close <- TRUE
+  } else if(any(identical(trim(close), ""), identical(trim(close), character()))){
+    no_close <- TRUE
+  }
+
+  if(isTRUE(no_attrs)){
+    indent_attrs <- ""
+    indent_end <- ""
+    next_attr <- ""
+    first_attr <- ""
+    if(isTRUE(space_attrs)){
+      extra_space_attrs <-" "
+    } else {}
+  } else {}
+
+  if(isTRUE(no_close)){
+    if(!isTRUE(no_child)){
+      stop(simpleError("Invalid call to XiMpLe:::paste_shine(): Missing closing tag!"))
+    } else {}
+    next_close <- ""
+    indent_close <- ""
+  } else {}
+
+  if(isTRUE(no_child)){
+    indent_child <- ""
+    child <- ""
+    if(any(shine < 2, as_script)){
+      next_attr <- ""
+    } else {}
+    first_child <- ""
+    extra_space_child <-""
+  } else {}
+
+  if(
+      all(
+        isTRUE(as_script),
+        any(
+          identical(attrs, ""),
+          identical(shine, 1)
+        ),
+        identical(child, "")
+      )
+  ){
+    next_close <- ""
+    indent_close <- ""
+  } else {}
+
+  ## debugging:
+  # message(
+  #   paste0(
+  #     "level: ", level, "\n",
+  #     "indent_node: ", deparse(indent_node), "\n",
+  #     "start: ", deparse(start), "\n",
+  #     "first_attr: ", deparse(first_attr), "\n",
+  #     "indent_attrs: ", deparse(indent_attrs), "\n",
+  #     "attrs: ", deparse(attrs), "\n",
+  #     "next_attr: ", deparse(next_attr), "\n",
+  #     "extra_space_attrs: ", deparse(extra_space_attrs), "\n",
+  #     "indent_end: ", deparse(indent_end), "\n",
+  #     "end: ", deparse(end), "\n",
+  #     "first_child: ", deparse(first_child), "\n",
+  #     "indent_child: ", deparse(indent_child), "\n",
+  #     "extra_space_child: ", deparse(extra_space_child), "\n",
+  #     "child: ", deparse(child), "\n",
+  #     "next_close: ", deparse(next_close), "\n",
+  #     "indent_close: ", deparse(indent_close), "\n",
+  #     "close: ", deparse(close), "\n",
+  #     "next_node: ", deparse(next_node), "\n"
+  #   )
+  # )
+
+  return(
+    paste0(
+      indent_node, start, first_attr,
+      indent_attrs, attrs, next_attr, extra_space_attrs,
+      indent_end, end, first_child,
+      indent_child, extra_space_child, trim(child), extra_space_child,
+      next_close,
+      indent_close, close,
+      next_node
+    )
+  )
+} ## end function paste_shine()
+
+
 ## function xml.tidy()
 # replace special character < and > from attributes or text values
 # with harmless entities
@@ -197,9 +402,19 @@ lookupAttrName <- function(tag, attr, rename){
   return(attr.name)
 } ## end function lookupAttrName()
 
+
 ## function pasteXMLAttr()
 # pastes all attributes in a nicely readable way
-pasteXMLAttr <- function(attr=NULL, tag=NULL, level=1, rename=NULL, shine=2, indent.by="\t", tidy=FALSE){
+pasteXMLAttr <- function(
+  attr=NULL,
+  tag=NULL,
+  level=1,
+  rename=NULL,
+  shine=2,
+  indent.by="\t",
+  tidy=FALSE,
+  as_script=FALSE
+){
   if(is.null(attr)){
     return("")
   } else {}
@@ -210,21 +425,51 @@ pasteXMLAttr <- function(attr=NULL, tag=NULL, level=1, rename=NULL, shine=2, ind
 
   new.indent <- ifelse(shine > 1, indent(level+1, by=indent.by), "")
   new.attr   <- ifelse(shine > 1, "\n", " ")
+  paste_collapse <- ifelse(isTRUE(as_script), paste0(",", new.attr, new.indent), paste0(new.attr, new.indent))
 
   # only use formatting if more than one attribute
   if(length(attr) > 1){
     full.attr <- c()
-    for (this.attr in names(attr)){
-      # skip empty elements
-      if(is.null(attr[[this.attr]])){next}
-      if(!is.null(rename)){
-        # look up attribute name to paste
-        attr.name <- lookupAttrName(tag, this.attr, rename=rename)
-      } else {
-        attr.name <- this.attr
+    full.attr <- paste0(sapply(
+      names(attr),
+      function(this.attr){
+        # skip empty elements
+        if(is.null(attr[[this.attr]])){
+          return()
+        } else {
+          if(!is.null(rename)){
+            # look up attribute name to paste
+            attr.name <- lookupAttrName(tag, this.attr, rename=rename)
+          } else {
+            attr.name <- this.attr
+          }
+          if(identical(attr[[this.attr]], character())){
+            # empty argument
+            if(isTRUE(as_script)){
+              attr_value <- "=character()"
+            } else {
+              attr_value <- ""
+            }
+          } else {
+            attr_value <- paste0("=\"", attr[[this.attr]], "\"")
+          }
+          return(
+            trim(paste0(full.attr, new.attr, new.indent, attr.name, attr_value))
+          )
+        }
       }
-      full.attr <- trim(paste0(full.attr, new.attr, new.indent, attr.name, "=\"", attr[[this.attr]], "\""))
-    }
+    ), collapse=paste_collapse)
+#     for (this.attr in seq_along(all_attrs)){
+#       # skip empty elements
+#       if(is.null(attr[[this.attr]])){next}
+#       if(!is.null(rename)){
+#         # look up attribute name to paste
+#         attr.name <- lookupAttrName(tag, this.attr, rename=rename)
+#       } else {
+#         attr.name <- this.attr
+#       }
+#       full.attr <- trim(paste0(full.attr, new.attr, new.indent, attr.name, "=\"", attr[[this.attr]], "\""))
+#     }
   } else {
     if(!is.null(rename)){
       # look up attribute name to paste
@@ -232,42 +477,199 @@ pasteXMLAttr <- function(attr=NULL, tag=NULL, level=1, rename=NULL, shine=2, ind
     } else {
       attr.name <- names(attr)
     }
-    # look up attribute name to paste
-    full.attr <- paste0(attr.name, "=\"", attr[[1]], "\"")
+    if(identical(attr[[1]], character())){
+      # empty argument
+      if(isTRUE(as_script)){
+        attr_value <- "=character()"
+      } else {
+        attr_value <- ""
+      }
+    } else {
+      attr_value <- paste0("=\"", attr[[1]], "\"")
+    }
+    full.attr <- paste0(attr.name, attr_value)
   }
   return(full.attr)
 } ## end function pasteXMLAttr()
 
+
+## function args2list()
+# takes a string that was separated from a tag, containing only its attributes,
+# and tries to turn it into a named list
+# drop_empty_tags: if set to TRUE, empty tags will be removed, otherwise they will
+#   get an empty character value assigned to them
+# doctype_args: if TRUE, quoted empty attributes will temporarily be named for
+#   counting the start and end points of arguments, to not confuse the parser
+attr2list <- function(attr, drop_empty_tags=FALSE, doctype_args=FALSE){
+  # regular expression to detect alphanumeric characters (we'll also accept some more,
+  # this is mainly needed to safely detect spaces and quotes from argument values
+  # unicode 00A7 is the section sign ("§", non-ASCII)
+  alnum_plus <- "[-_/'|*#@+~&%$\u00A7.,:;(){}?![:alnum:]]"
+  doctype_restore <- FALSE
+  qr_to_use <- ""
+  if(isTRUE(doctype_args) & grepl("\"", attr)){
+    # find a temporary name for quoted empty attributes,
+    # testing a few that are unlikely all used here
+    quote_replacer <- c(
+      "\u0142", # ł (latin small letter "L" with stroke)
+      "\u014B", # ŋ (latin small letter "Eng")
+      "\u0167", # ŧ (latin small letter "T" with stroke)
+      "\u00E6", # æ (latin small letter "Ae")
+      "\u00F0", # ð (latin small letter "Eth")
+      "\u00F8", # ø (latin small letter "O" with stroke)
+      "\u00FE"  # þ (latin small letter "Thorn")
+    )
+    qr_in_attrs <- sapply(
+      quote_replacer,
+      function(this_qr){
+        any(grepl(this_qr, x=attr))
+      }
+    )
+    if(!all(qr_in_attrs)){
+      qr_to_use <- names(which.min(!qr_in_attrs))
+      attr <- gsub("[[:space:]]\"", paste0(" ", qr_to_use, "=\""), attr)
+      doctype_restore <- TRUE
+    } else {
+      # go on without replacement, this will likely result in an error
+    }
+  } else {}
+  # split into individual characters
+  attr_chars <- unlist(strsplit(trim(attr), ""))
+  if(length(attr_chars) > 0){
+    # which one is alphanumeric (we'll also accept "-" and "_"?
+    attr_alnum <- grepl(alnum_plus, attr_chars)
+    # find continuous patterns in the boolean vector, i.e. detect words vs. nonwords
+    attr_alnum_rle <- rle(attr_alnum)
+    # add zero for the sapply loop
+    attr_borders <- c(0, cumsum(attr_alnum_rle[["lengths"]]))
+    # here we glue the single characters together again,
+    # this way we'll get words in one string an nonwords in separated strings
+    # the result should be a vector of strings that is either
+    #   - just alphanumeric, which could be either an attribute name or part of an attribute value
+    #   - non-alphanumeric, which could be
+    #     - space
+    #     - "=\"" (including spaces, start of an attribute value)
+    #     - "\"" (including spaces, end of an attribute value)
+    #     - anything else, part of an attribute value
+    attr_tokens <- sapply(seq_along(attr_borders)[-1],
+      function(n){
+        paste0(attr_chars[(attr_borders[n-1] + 1):attr_borders[n]], collapse="")
+      }
+    )
+    tokens_n <- seq_along(attr_tokens)
+    # now we'll mark start and end of attributes
+    attr_on <- grepl("^[[:space:]]*=[[:space:]]*\"[[:space:]]*$", attr_tokens)
+    attr_off <- grepl("^[[:space:]]*\"[[:space:]]*$", attr_tokens)
+    # numbers must match, otherwise there was an error in parsing and we should PANIC! :D
+    if(!identical(sum(attr_on), sum(attr_off))){
+      stop(
+        simpleError(
+          paste0(
+            "Looks like I failed to parse attributes correctly. This one i couldn't digest:\n  \"",
+            paste0(attr_chars, collapse=""),
+            "\""
+          )
+        )
+      )
+    } else {}
+    if(sum(attr_on, attr_off) > 0){
+      # now we can assume the range of attribute values
+      # make it a list to keep them separated
+      # each list entry is a vector of one full attribute value
+      attr_values <- lapply(
+        1:sum(attr_on),
+        function(n){
+          which(attr_on)[n]:which(attr_off)[n]
+        }
+      )
+      # right before each attribute value should be the attribute's name
+      attr_names <- sapply(
+        attr_values,
+        function(val){
+          if(val[1] < 2){
+            stop(simpleError("I've detected an attribute value without an attribute name!"))
+          } else {
+            arg_name_n <- val[1] - 1
+          }
+          if(!isTRUE(grepl(alnum_plus, attr_tokens[arg_name_n]))){
+            warning(paste0("This attribute name might be invalid, please check: \"", attr_tokens[arg_name_n], "\""), call.=FALSE)
+          } else {}
+          return(arg_name_n)
+        }
+      )
+    } else {
+      # only empty attributes?
+      attr_values <- list()
+      attr_names <- attr_tokens
+    }
+
+    # for safety reasons, consider putting arg names in quotes when non alphanumeric strings are used
+    non_alnum_names <- grepl("[^[:alnum:]]", attr_tokens[attr_names])
+    if(any(non_alnum_names)){
+      attr_tokens[attr_names[non_alnum_names]] <- paste0("\"", attr_tokens[attr_names[non_alnum_names]], "\"")
+    } else {}
+
+    # if we've gotten this far, all that's neither an attribute name nor its value is probably an empty attribute
+    attr_done <- sort(c(attr_names, unlist(attr_values)))
+    attr_unknown <- tokens_n[!tokens_n %in% attr_done]
+    if(length(attr_unknown) > 0){
+      attr_unknown <- attr_unknown[!grepl("^[[:space:]]+$", attr_tokens[attr_unknown])]
+      if(length(attr_unknown) > 0){
+        # set value for empty attribute
+        attr_tokens <- unlist(sapply(
+          tokens_n,
+          function(n){
+            if(isTRUE(n %in% attr_unknown)){
+              if(isTRUE(drop_empty_tags)){
+                return("")
+              } else {
+                return(c(attr_tokens[n], "=character()"))
+              }
+            } else {
+              return(attr_tokens[n])
+            }
+          }
+        ))
+        # recalculate attr_off
+        attr_off <- grepl("^[[:space:]]*\"[[:space:]]*$|^[[:space:]]*=character\\(\\)[[:space:]]*$", attr_tokens)
+      } else {}
+    } else {}
+    # all but the last value closing will need a comma separator
+    if(length(which(attr_off)) > 1){
+      add_comma <- which(attr_off)
+      add_comma <- add_comma[1:(length(add_comma) - 1)]
+      attr_tokens[add_comma] <- paste0(attr_tokens[add_comma], ",")
+    } else {}
+    result <- eval(parse(text=paste("list(", paste0(attr_tokens, collapse=""), ")")))
+    if(isTRUE(doctype_restore)){
+      # restore the original attributes
+      to_restore <- which(names(result) %in% qr_to_use)
+      if(length(to_restore) > 0){
+        new_names <- paste0("\"", result[to_restore], "\"")
+        for(this_attr in to_restore){
+          result[[this_attr]] <- character()
+        }
+        names(result)[to_restore] <- new_names
+      } else {}
+    } else {}
+    return(result)
+  } else {
+    return(list())
+  }
+} ## end function attr2list()
+
+
 ## function parseXMLAttr()
 # takes a whole XML tag and returns a named list with its attributes
-parseXMLAttr <- function(tag){
-  if(XML.doctype(tag)){
-    stripped.tag <- gsub("<!((?i)DOCTYPE)[[:space:]]+([^[:space:]]+)[[:space:]]*([^\"[:space:]]*)[[:space:]]*.*>",
-      "doctype=\"\\2\", decl=\"\\3\"", tag)
-    stripped.tag2 <- eval(parse(text=paste("c(",gsub("[^\"]*[\"]?([^\"]*)[\"]?[^\"]*", "\"\\1\",", tag),"NULL)")))
-    is.dtd <- grepl("\\.dtd", stripped.tag2)
-    doct.decl <- ifelse(sum(!is.dtd) > 0, paste0(stripped.tag2[!is.dtd][1]), paste0(""))
-    doct.ref <- ifelse(sum(is.dtd) > 0, paste0(stripped.tag2[is.dtd][1]), paste0(""))
-    parsed.list <- eval(parse(text=paste0("list(", stripped.tag, ", id=\"", doct.decl,"\"", ", refer=\"", doct.ref,"\")")))
-  } else if(XML.endTag(tag) | XML.comment(tag) |XML.cdata(tag)){
+parseXMLAttr <- function(tag, drop_empty_tags=FALSE){
+  if(XML.endTag(tag) | XML.comment(tag) | XML.cdata(tag)){
     # end tags, comments and CDATA don't have attributes
     parsed.list <- ""
   } else {
     # first strip of start and end characters
     stripped.tag <- gsub("<([?[:space:]]*)[^[:space:]]+[[:space:]]*(.*)", "\\2", tag, perl=TRUE)
-    stripped.tag <- gsub("[/?]*>$", "", stripped.tag, perl=TRUE)
-    # fill in commas, so we can evaluate this as elements of a named list
-    separated.tag <- gsub("=[[:space:]]*\"([^\"]*)\"[[:space:]]+([^[:space:]=]+)", "=\"\\1\", \\2", stripped.tag, perl=TRUE)
-    # to be on the safe side, escape all list names, in case there's unexpected special characters in them
-    separated.tag <- gsub("( ,)?([^[:space:],\"]*)=\"", "\\1\"\\2\"=\"", separated.tag, perl=TRUE)
-    ###################################################################################
-    ## TODO:
-    ## empty attributes are not valid, force them into attribute="attribute"
-    ## does only work partially it the empty attribute is the last in line
-    ## and still causes *problems* in matching string in the value of other attributes!
-    # separated.tag <- gsub("(, |\\A)([^[:space:],\"=][[:alnum:]]*)", "\\1\"\\2\"=\"\\2\"", separated.tag, perl=TRUE)
-    ###################################################################################
-    parsed.list <- eval(parse(text=paste("list(", separated.tag, ")")))
+    stripped.tag <- trim(gsub("[/?]*>$", "", stripped.tag, perl=TRUE))
+    parsed.list <- attr2list(stripped.tag, drop_empty_tags=drop_empty_tags, doctype_args=XML.doctype(tag))
   }
   if(XML.declaration(tag)){
     # only enforce validation for <?xml ... ?>
@@ -283,6 +685,7 @@ parseXMLAttr <- function(tag){
   return(parsed.list)
 } ## end function parseXMLAttr()
 
+
 ## function trim()
 # cuts off space at start and end of a character string
 trim <- function(char){
@@ -290,6 +693,7 @@ trim <- function(char){
   char <- gsub("[[:space:]]*$", "", char)
   return(char)
 } ## end function trim()
+
 
 ## function XML.emptyTag()
 # checks if a tag is a pair of start/end tags or an empty tag;
@@ -311,6 +715,7 @@ XML.emptyTag <- function(tag, get=FALSE){
   return(empty.tags)
 } ## end function XML.emptyTag()
 
+
 ## function XML.endTag()
 # checks if a tag an end tag;
 # returns either TRUE/FALSE, or the tag name if it is an end tag and get=TRUE
@@ -330,6 +735,7 @@ XML.endTag <- function(tag, get=FALSE){
   )
   return(end.tags)
 } ## end function XML.endTag()
+
 
 ## function XML.comment()
 # checks if a tag is a comment, returns TRUE or FALSE, or the comment (TRUE & get=TRUE)
@@ -351,6 +757,7 @@ XML.comment <- function(tag, get=FALSE, trim=TRUE){
   return(comment.tags)
 } ## end function XML.comment()
 
+
 ## function XML.cdata()
 # checks if a tag is a CDATA declaration, returns TRUE or FALSE, or the data (TRUE & get=TRUE)
 XML.cdata <- function(tag, get=FALSE, trim=TRUE){
@@ -370,6 +777,7 @@ XML.cdata <- function(tag, get=FALSE, trim=TRUE){
   )
   return(cdata.tags)
 } ## end function XML.cdata()
+
 
 ## function XML.commcdata()
 # checks if a tag is a /* CDATA */ declaration, returns TRUE or FALSE, or the data (TRUE & get=TRUE)
@@ -391,6 +799,7 @@ XML.commcdata <- function(tag, get=FALSE, trim=TRUE){
   return(commcdata.tags)
 } ## end function XML.commcdata()
 
+
 ## function XML.value()
 # checks if 'tag' is actually not a tag but value/content/data. returns TRUE or FALSE, or the value (TRUE & get=TRUE)
 XML.value <- function(tag, get=FALSE, trim=TRUE){
@@ -411,6 +820,7 @@ XML.value <- function(tag, get=FALSE, trim=TRUE){
   return(all.values)
 } ## end function XML.value()
 
+
 ## function XML.declaration()
 # checks for a declaration, like <?xml bar?>
 XML.declaration <- function(tag, get=FALSE){
@@ -429,6 +839,7 @@ XML.declaration <- function(tag, get=FALSE){
   )
   return(decl.tags)
 } ## end function XML.declaration()
+
 
 ## function XML.doctype()
 # checks for a doctype declaration, like <!DOCTYPE foo>
@@ -449,6 +860,7 @@ XML.doctype <- function(tag, get=FALSE){
   return(decl.tags)
 } ## end function XML.doctype()
 
+
 ## function XML.def()
 XML.def <- function(tag, get=FALSE){
   decl.tags <- sapply(
@@ -467,6 +879,7 @@ XML.def <- function(tag, get=FALSE){
   return(decl.tags)
 } ## end function XML.def()
 
+
 ## function XML.tagName()
 XML.tagName <- function(tag){
   tag.names <- sapply(
@@ -480,22 +893,9 @@ XML.tagName <- function(tag){
   return(tag.names)
 } ## end function XML.tagName()
 
-## function parseXMLTag()
-parseXMLTag <- function(tag){
-  tag.name <- XML.tagName(tag)
-  tag.attr <- parseXMLAttr(tag)
-  if(!is.null(tag.attr)){
-    parsed.tag <- list()
-    parsed.tag[[tag.name]] <- list(attr=tag.attr)
-  } else {
-    parsed.tag <- list()
-    parsed.tag[[tag.name]] <- list()
-  }
-  return(parsed.tag)
-} ## end function parseXMLTag()
 
 ## function XML.nodes()
-XML.nodes <- function(single.tags, end.here=NA, start=1){
+XML.nodes <- function(single.tags, end.here=NA, drop_empty_tags=FALSE, start=1){
   # to save memory, we'll put the single.tags object into an environment
   # and pass that on to all iterations
   if(is.environment(single.tags)){
@@ -525,43 +925,48 @@ XML.nodes <- function(single.tags, end.here=NA, start=1){
     } else {}
     # we must test for commented CDATA first, because XML.value() would be TRUE, too
     if(XML.commcdata(this.tag)){
-      children[[nxt.child]] <- new("XiMpLe.node",
+      children[[nxt.child]] <- XiMpLe_node(
         name="*![CDATA[",
-        value=XML.commcdata(this.tag, get=TRUE))
+        value=XML.commcdata(this.tag, get=TRUE)
+      )
       names(children)[nxt.child] <- "*![CDATA["
       tag.no <- tag.no + 1
       next
     } else {}
     if(XML.value(this.tag)){
-      children[[nxt.child]] <- new("XiMpLe.node",
+      children[[nxt.child]] <- XiMpLe_node(
         name="",
-        value=XML.value(this.tag, get=TRUE))
+        value=XML.value(this.tag, get=TRUE)
+      )
       names(children)[nxt.child] <- "!value!"
       tag.no <- tag.no + 1
       next
     } else {
-      child.attr <- parseXMLAttr(this.tag)
+      child.attr <- parseXMLAttr(this.tag, drop_empty_tags=drop_empty_tags)
     }
     if(XML.declaration(this.tag)){
-      children[[nxt.child]] <- new("XiMpLe.node",
+      children[[nxt.child]] <- XiMpLe_node(
         name=child.name,
-        attributes=child.attr)
+        attributes=child.attr
+      )
       names(children)[nxt.child] <- child.name
       tag.no <- tag.no + 1
       next
     } else {}
     if(XML.comment(this.tag)){
-      children[[nxt.child]] <- new("XiMpLe.node",
+      children[[nxt.child]] <- XiMpLe_node(
         name="!--",
-        value=XML.comment(this.tag, get=TRUE))
+        value=XML.comment(this.tag, get=TRUE)
+      )
       names(children)[nxt.child] <- "!--"
       tag.no <- tag.no + 1
       next
     } else {}
     if(XML.cdata(this.tag)){
-      children[[nxt.child]] <- new("XiMpLe.node",
+      children[[nxt.child]] <- XiMpLe_node(
         name="![CDATA[",
-        value=XML.cdata(this.tag, get=TRUE))
+        value=XML.cdata(this.tag, get=TRUE)
+      )
       names(children)[nxt.child] <- "![CDATA["
       tag.no <- tag.no + 1
       next
@@ -572,21 +977,23 @@ XML.nodes <- function(single.tags, end.here=NA, start=1){
     if(!XML.emptyTag(this.tag)){
     ## uncomment to debug:
     # cat(child.name, ":", tag.no, "-", child.end.tag,"\n")
-      rec.nodes <- XML.nodes(single.tags.env, end.here=child.name, start=tag.no + 1)
-      children[[nxt.child]] <- new("XiMpLe.node",
+      rec.nodes <- XML.nodes(single.tags.env, end.here=child.name, drop_empty_tags=drop_empty_tags, start=tag.no + 1)
+      children[[nxt.child]] <- XiMpLe_node(
         name=child.name,
         attributes=child.attr,
         children=rec.nodes$children,
         # this value will force the node to remain non-empty if it had no children,
         # it would be turned into an empty tag otherwise
-        value="")
+        value=""
+      )
       names(children)[nxt.child] <- child.name
       tag.no <- rec.nodes$tag.no + 1
       next
     } else {
-      children[[nxt.child]] <- new("XiMpLe.node",
+      children[[nxt.child]] <- XiMpLe_node(
         name=child.name,
-        attributes=child.attr)
+        attributes=child.attr
+      )
       names(children)[nxt.child] <- child.name
       tag.no <- tag.no + 1
       next

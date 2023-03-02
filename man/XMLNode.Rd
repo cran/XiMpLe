@@ -2,48 +2,79 @@
 % Please edit documentation in R/XMLNode.R
 \name{XMLNode}
 \alias{XMLNode}
-\title{Constructor function for XiMpLe.node objects}
+\title{Constructor function for \code{XiMpLe_node} objects}
 \usage{
 XMLNode(
-  name,
+  tag_name,
   ...,
-  attrs = NULL,
-  namespace = "",
-  namespaceDefinitions = NULL,
+  attrs,
+  shine,
+  namespace,
+  namespaceDefinitions,
   .children = list(...)
 )
 }
 \arguments{
-\item{name}{Character string, the tag name.}
+\item{tag_name}{Character string, the tag name.}
 
-\item{...}{Optional children for the tag. Must be either objects of class XiMpLe.node or character strings,
-which are treated as simple text values. If this is empty,
-      the tag will be treated as an empty tag. To
-force a closing tag, supply an empty string, i.e. \code{""}.}
+\item{...}{Optional children for the tag. Must be either objects of class \code{\link[XiMpLe:XiMpLe_node]{XiMpLe_node}}
+or character strings, which are treated as attributes if they are named,
+      and as simple text values otherwise.
+Use a named \code{character()} value for empty attributes.
+If this argument is empty,
+      the tag will be treated as an empty tag. To force a closing tag, supply an empty
+string, i.e. \code{""}.}
 
-\item{attrs}{An optional named list of attributes.}
+\item{attrs}{An optional named list of attributes. Will be appended to attributes already defined in
+the \code{...} argument.}
+
+\item{shine}{A numeric integer value between 0 and 2,
+      overwriting the \code{shine} value of, e.g., \code{\link[XiMpLe:pasteXML]{pasteXML}}
+for this particular node.}
 
 \item{namespace}{Currently ignored.}
 
 \item{namespaceDefinitions}{Currently ignored.}
 
 \item{.children}{Alternative way of specifying children,
-      if you have them already as a list.}
+      if you have them already as a list.
+This argument completely replaces values defined in the \code{...} argument.}
 }
 \value{
-An object of class \code{\link[XiMpLe:XiMpLe.node-class]{XiMpLe.node}}.
+An object of class \code{\link[XiMpLe:XiMpLe_node-class]{XiMpLe_node}}.
 }
 \description{
 Can be used to create XML nodes.
 }
 \details{
-To generate a CDATA node, set \code{name="![CDATA["}, to create a comment,
-      set \code{name="!--"}.
+To generate a CDATA node, set \code{tag_name="![CDATA["}, to create a comment,
+      set \code{tag_name="!--"}.
+
+Note that all defined attributes will silently be dropped if a text node,
+      CDATA node or comment is generated.
 }
 \examples{
-sample.XML.node <- XMLNode("a",
-  attrs=list(href="http://example.com", target="_blank"),
-  .children="klick here!")
+(sample.XML.node <- XMLNode("a",
+  attrs=list(
+    href="http://example.com",
+    target="_blank"
+  ),
+  .children="klick here!"
+))
+# This is equivalent
+(sample.XML.node2 <- XMLNode("a",
+  "klick here!",
+  href="http://example.com",
+  target="_blank"
+))
+# As is this
+(sample.XML.node3 <- XMLNode("a",
+  .children=list(
+    "klick here!",
+    href="http://example.com",
+    target="_blank"
+  )
+))
 }
 \seealso{
 \code{\link[XiMpLe:XMLTree]{XMLTree}},

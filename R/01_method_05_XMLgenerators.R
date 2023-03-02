@@ -1,4 +1,4 @@
-# Copyright 2016-2017 Meik Michalke <meik.michalke@hhu.de>
+# Copyright 2016-2022 Meik Michalke <meik.michalke@hhu.de>
 #
 # This file is part of the R package XiMpLe.
 #
@@ -60,7 +60,7 @@
 #' @export
 #' @rdname XMLgenerators
 #' @include 00_class_03_XiMpLe.validity.R
-setGeneric("XMLgenerators", function(validity, prefix="XML", checkValidity=TRUE, indent.by="\t", roxygenDocs=FALSE,
+setGeneric("XMLgenerators", function(validity, prefix="XML", checkValidity=TRUE, indent.by=getOption("XiMpLe_indent", "\t"), roxygenDocs=FALSE,
   valParam="validity", replaceChar="_", dir=NULL, overwrite=FALSE, oneFile=NULL){standardGeneric("XMLgenerators")})
 
 #' @rdname XMLgenerators
@@ -212,7 +212,7 @@ setMethod("XMLgenerators", signature(validity="XiMpLe.validity"), function(valid
             if(length(thisNodeChildNames > 1)){
               rxdocChildren <- paste0(
                 "#' @param ", validParamName(thisNodeChildNames),
-                " An object of class \\code{XiMpLe.node} (or list of) to define \\code{<", thisNodeChildNames, ">} child nodes for this node. Ignored if \\code{NULL.}"
+                " An object of class \\code{XiMpLe_node} (or list of) to define \\code{<", thisNodeChildNames, ">} child nodes for this node. Ignored if \\code{NULL.}"
               )
             } else {
               rxdocChildren <- NULL
@@ -220,7 +220,7 @@ setMethod("XMLgenerators", signature(validity="XiMpLe.validity"), function(valid
           } else {
               rxdocChildren <- paste0(
                 "#' @param ... ",
-                " Object(s) of class \\code{XiMpLe.node} to define \\code{<", thisNodeChildNames, ">} child nodes for this node. Ignored if empty."
+                " Object(s) of class \\code{XiMpLe_node} to define \\code{<", thisNodeChildNames, ">} child nodes for this node. Ignored if empty."
               )
           }
 
@@ -251,10 +251,10 @@ setMethod("XMLgenerators", signature(validity="XiMpLe.validity"), function(valid
           rxdoc <- paste(
             paste0("#' Generate <", thisNode, "> XML nodes"),
             "#'",
-            paste0("#' Generates an object of class \\code{\\link[XiMpLe:XiMpLe.node-class]{XiMpLe.node}} with node name \\code{<", thisNode, ">}."),
+            paste0("#' Generates an object of class \\code{\\link[XiMpLe:XiMpLe_node-class]{XiMpLe_node}} with node name \\code{<", thisNode, ">}."),
             "#'",
             paste0(rxdocParams, collapse="\n"),
-            "#' @return An object of class \\code{\\link[XiMpLe:XiMpLe.node-class]{XiMpLe.node}}.",
+            "#' @return An object of class \\code{\\link[XiMpLe:XiMpLe_node-class]{XiMpLe_node}}.",
             paste0("#' @rdname ", rdFile),
             "#' @export",
             sep="\n"
